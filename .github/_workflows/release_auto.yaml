@@ -1,0 +1,16 @@
+name: Create Tag and Release on PR
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - '**.tf'
+      - '!examples/**'
+
+
+jobs:
+  release:
+    name: Calculate and create next tag with release
+    uses: Mattilsynet/wf-map-tf-releases/.github/workflows/release_auto.yaml@v0
+    if: github.event.pull_request.merged && contains( github.event.pull_request.labels.*.name, 'release')
+    secrets: inherit

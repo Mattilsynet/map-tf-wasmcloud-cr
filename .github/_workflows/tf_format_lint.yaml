@@ -1,0 +1,12 @@
+name: Terraform format and linter checks
+on:
+  pull_request:
+    types: ["opened", "synchronize"]
+    paths:
+    - '**.tf'
+
+jobs:
+  format-and-lint-check:
+    name: Format and lint checks
+    uses: Mattilsynet/wf-map-tf-releases/.github/workflows/tf_format_lint.yaml@v0
+    secrets: inherit

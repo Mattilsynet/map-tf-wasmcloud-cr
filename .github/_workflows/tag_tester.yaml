@@ -1,0 +1,10 @@
+name: Tag tester
+on:
+  pull_request:
+    types: ["opened", "synchronize"]
+
+jobs:
+  tag_printer:
+    name: Tag tester
+    uses: Mattilsynet/wf-map-tf-releases/.github/workflows/tag_tester.yaml@v0
+    secrets: inherit

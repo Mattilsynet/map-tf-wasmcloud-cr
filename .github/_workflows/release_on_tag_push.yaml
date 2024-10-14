@@ -1,0 +1,13 @@
+name: Create Draft Release on Tag (push)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Github Release
+    uses: Mattilsynet/wf-map-tf-releases/.github/workflows/release_on_tag_push.yaml@v0
+    if: github.ref_type == 'tag'
+    secrets: inherit
