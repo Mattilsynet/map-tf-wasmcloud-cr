@@ -2,13 +2,11 @@ locals {
   wasmcloud_service_name = "wasmcloud"
   wadm_service_name      = "wadm"
 
-  wasmcloud_nats_config_name = "nats.conf"
-  wasmcloud_nats_config_path = "/etc/nats"
-  wasmcloud_nats_creds_name  = "nats.creds"
-  wasmcloud_nats_creds_path  = "/etc/nats/creds"
+  wasmcloud_nats_creds_name = "rpc-nats.creds"
+  wasmcloud_nats_creds_path = "/etc/nats/rpc-creds"
 
-  wadm_nats_creds_name = "nats.creds"
-  wadm_nats_creds_path = "/etc/nats/creds"
+  wadm_nats_creds_name = "ctl-nats.creds"
+  wadm_nats_creds_path = "/etc/nats/ctl-creds"
 
 }
 
@@ -140,9 +138,8 @@ resource "google_secret_manager_secret_version" "wasmcloud_nats_config_version" 
 
 locals {
   wasmcloud_secrets = {
-    "wasmcloud_cr_nats_creds"  = google_secret_manager_secret.wasmcloud_cr_nats_creds.id,
-    "wadm_cr_nats_creds"       = google_secret_manager_secret.wadm_cr_nats_creds.id,
-    "wasmcloud_cr_nats_config" = google_secret_manager_secret.wasmcloud_cr_nats_config.id,
+    "wasmcloud_cr_nats_creds" = google_secret_manager_secret.wasmcloud_cr_nats_creds.id,
+    "wadm_cr_nats_creds"      = google_secret_manager_secret.wadm_cr_nats_creds.id,
   }
 
   wadm_secrets = {
@@ -176,20 +173,9 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
   project             = var.project_id
   deletion_protection = false
 
+
   template {
     service_account = google_service_account.wasmcloud_service_sa.email
-
-    volumes {
-      name = "wasmcloud-nats-config"
-      secret {
-        secret       = google_secret_manager_secret.wasmcloud_cr_nats_config.id
-        default_mode = 292 # 0444
-        items {
-          version = "latest"
-          path    = local.wasmcloud_nats_config_name
-        }
-      }
-    }
 
     volumes {
       name = "wasmcloud-nats-credentials"
@@ -203,39 +189,79 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
     }
 
+    volumes {
+      name = "wadm-nats-credentials"
+      secret {
+        secret       = google_secret_manager_secret.wadm_cr_nats_creds.id
+        default_mode = 292 # 0444
+        items {
+          version = "latest"
+          path    = local.wadm_nats_creds_name
+        }
+      }
+    }
+
     containers {
       name  = "hello"
       image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
 
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+      }
       ports {
         container_port = 8080
       }
     }
 
     containers {
-      name  = "nats"
-      image = "nats:2.10-alpine"
-
-      args = ["-c", "/etc/nats/nats.conf"]
-
-      volume_mounts {
-        name       = "wasmcloud-nats-config"
-        mount_path = local.wasmcloud_nats_config_path
-      }
-
-      volume_mounts {
-        name       = "wasmcloud-nats-credentials"
-        mount_path = local.wasmcloud_nats_creds_path
-      }
-    }
-
-    containers {
       name  = "wasmcloud"
-      image = "wasmcloud/wasmcloud:latest"
+      image = "wasmcloud/wasmcloud:1.3.1"
+
+      resources {
+        limits = {
+          cpu    = "2"
+          memory = "2048Mi"
+        }
+      }
 
       env {
         name  = "RUST_LOG"
-        value = "debug,hyper=info,async_nats=info,oci_distribution=info,cranelift_codegen=warn"
+        value = "trace,hyper=info,async_nats=info,oci_distribution=info,cranelift_codegen=warn"
+      }
+      env {
+        name  = "WASMCLOUD_RPC_HOST"
+        value = var.wasmcloud_nats_host
+      }
+      env {
+        name  = "WASMCLOUD_RPC_PORT"
+        value = var.wasmcloud_nats_port
+      }
+      env {
+        name  = "WASMCLOUD_RPC_TLS"
+        value = "true"
+      }
+      env {
+        name  = "WASMCLOUD_CTL_HOST"
+        value = var.wadm_nats_host
+      }
+      env {
+        name  = "WASMCLOUD_CTL_PORT"
+        value = var.wadm_nats_port
+      }
+      env {
+        name  = "WASMCLOUD_CTL_TLS"
+        value = "true"
+      }
+      env {
+        name  = "WASMCLOUD_RPC_CREDS"
+        value = "${local.wasmcloud_nats_creds_path}/${local.wasmcloud_nats_creds_name}"
+      }
+      env {
+        name  = "WASMCLOUD_CTL_CREDS"
+        value = "${local.wadm_nats_creds_path}/${local.wadm_nats_creds_name}"
       }
       env {
         name  = "WASMCLOUD_LOG_LEVEL"
@@ -247,7 +273,17 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
       env {
         name  = "WASMCLOUD_OBSERVABILITY_ENABLED"
-        value = "true"
+        value = "false"
+      }
+
+      volume_mounts {
+        name       = "wasmcloud-nats-credentials"
+        mount_path = local.wasmcloud_nats_creds_path
+      }
+
+      volume_mounts {
+        name       = "wadm-nats-credentials"
+        mount_path = local.wadm_nats_creds_path
       }
     }
   }
@@ -278,6 +314,14 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
       name  = "hello"
       image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
 
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+      }
+
+
       ports {
         container_port = 8080
       }
@@ -285,19 +329,29 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
 
     containers {
       name  = "wadm"
-      image = "wasmcloud/wadm:latest"
+      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wadm:v0.17.1"
+      resources {
+        limits = {
+          cpu    = "2"
+          memory = "2048Mi"
+        }
+      }
 
       env {
-        name  = "NATS_SERVER"
-        value = var.wadm_nats_host
+        name  = "WADM_NATS_SERVER"
+        value = "${var.wadm_nats_host}:${var.wadm_nats_port}"
       }
       env {
-        name  = "NATS_CREDS"
+        name  = "WADM_NATS_CREDS_FILE"
         value = "${local.wadm_nats_creds_path}/${local.wadm_nats_creds_name}"
       }
       env {
         name  = "WADM_STRUCTURED_LOGGING"
         value = "true"
+      }
+      env {
+        name  = "WADM_TRACING_ENABLED"
+        value = "false"
       }
 
       volume_mounts {

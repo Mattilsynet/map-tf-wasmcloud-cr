@@ -12,12 +12,23 @@ variable "region" {
 variable "wasmcloud_nats_host" {
   description = "The hostname of the NATS server."
   type        = string
-  default     = "localhost"
+}
+
+variable "wasmcloud_nats_port" {
+  description = "The port of the NATS server."
+  type        = string
+  default     = "4222"
 }
 
 variable "wadm_nats_host" {
   description = "The hostname of the NATS server."
   type        = string
+}
+
+variable "wadm_nats_port" {
+  description = "The port of the NATS server."
+  type        = string
+  default     = "4222"
 }
 
 variable "version_wasmcloud" {
