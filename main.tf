@@ -8,6 +8,23 @@ locals {
   wadm_nats_creds_name = "ctl-nats.creds"
   wadm_nats_creds_path = "/etc/nats/ctl-creds"
 
+  otel_config_name = "otel-config.yaml"
+  otel_config_path = "/etc/otelcol"
+
+}
+
+### Google Cloud Services
+
+resource "google_project_service" "gc_monitoring" {
+  project            = var.project_id
+  service            = "monitoring.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "gc_trace" {
+  project            = var.project_id
+  service            = "cloudtrace.googleapis.com"
+  disable_on_destroy = false
 }
 
 ### Service Accounts
@@ -105,19 +122,16 @@ resource "google_secret_manager_secret_version" "wadm_nats_cr_creds_version" {
 ### Secrets, Configs
 
 locals {
-  nats_config = templatefile(
-    "${path.module}/resources/nats.conf",
+  otel_config = templatefile(
+    "${path.module}/resources/otel-config.yaml",
     {
-      project_id           = var.project_id,
-      central_nats_host    = var.wadm_nats_host,
-      wasmcloud_creds_path = local.wasmcloud_nats_creds_path,
-      wasmcloud_creds_name = local.wasmcloud_nats_creds_name,
+      project_id = var.project_id
     }
   )
 }
 
-resource "google_secret_manager_secret" "wasmcloud_cr_nats_config" {
-  secret_id = "wasmcloud-cr-nats-config"
+resource "google_secret_manager_secret" "wasmcloud_cr_otel_config" {
+  secret_id = "wasmcloud-cr-otel-config"
   project   = var.project_id
   replication {
     user_managed {
@@ -128,9 +142,9 @@ resource "google_secret_manager_secret" "wasmcloud_cr_nats_config" {
   }
 }
 
-resource "google_secret_manager_secret_version" "wasmcloud_nats_config_version" {
-  secret      = google_secret_manager_secret.wasmcloud_cr_nats_config.id
-  secret_data = local.nats_config
+resource "google_secret_manager_secret_version" "wasmcloud_otel_config_version" {
+  secret      = google_secret_manager_secret.wasmcloud_cr_otel_config.id
+  secret_data = local.otel_config
 }
 
 
@@ -138,12 +152,14 @@ resource "google_secret_manager_secret_version" "wasmcloud_nats_config_version" 
 
 locals {
   wasmcloud_secrets = {
-    "wasmcloud_cr_nats_creds" = google_secret_manager_secret.wasmcloud_cr_nats_creds.id,
-    "wadm_cr_nats_creds"      = google_secret_manager_secret.wadm_cr_nats_creds.id,
+    "wasmcloud_cr_nats_creds"  = google_secret_manager_secret.wasmcloud_cr_nats_creds.id,
+    "wadm_cr_nats_creds"       = google_secret_manager_secret.wadm_cr_nats_creds.id,
+    "wasmcloud_cr_otel_config" = google_secret_manager_secret.wasmcloud_cr_otel_config.id,
   }
 
   wadm_secrets = {
-    "wadm_cr_nats_creds" = google_secret_manager_secret.wadm_cr_nats_creds.id,
+    "wadm_cr_nats_creds"       = google_secret_manager_secret.wadm_cr_nats_creds.id,
+    "wasmcloud_cr_otel_config" = google_secret_manager_secret.wasmcloud_cr_otel_config.id,
   }
 }
 
@@ -173,7 +189,6 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
   project             = var.project_id
   deletion_protection = false
 
-
   template {
     service_account = google_service_account.wasmcloud_service_sa.email
 
@@ -201,18 +216,41 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
     }
 
-    containers {
-      name  = "hello"
-      image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
+    volumes {
+      name = "otel-config"
+      secret {
+        secret       = google_secret_manager_secret.wasmcloud_cr_otel_config.id
+        default_mode = 292 # 0444
+        items {
+          version = "latest"
+          path    = local.otel_config_name
         }
       }
+    }
+
+    containers {
+      image = "otel/opentelemetry-collector-contrib:0.111.0"
+
+      args = ["--config=${local.otel_config_path}/${local.otel_config_name}"]
+
+      volume_mounts {
+        name       = "otel-config"
+        mount_path = local.otel_config_path
+      }
+
       ports {
-        container_port = 8080
+        name           = "http1"
+        container_port = 4318
+      }
+
+      startup_probe {
+        initial_delay_seconds = 5
+        timeout_seconds       = 20
+        period_seconds        = 60
+        failure_threshold     = 1
+        tcp_socket {
+          port = 4318
+        }
       }
     }
 
@@ -222,9 +260,10 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
 
       resources {
         limits = {
-          cpu    = "2"
-          memory = "2048Mi"
+          cpu    = "1"
+          memory = "1024Mi"
         }
+        cpu_idle = false
       }
 
       env {
@@ -273,7 +312,7 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
       env {
         name  = "WASMCLOUD_OBSERVABILITY_ENABLED"
-        value = "false"
+        value = "true"
       }
 
       volume_mounts {
@@ -310,31 +349,56 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
       }
     }
 
-    containers {
-      name  = "hello"
-      image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
+    volumes {
+      name = "otel-config"
+      secret {
+        secret       = google_secret_manager_secret.wasmcloud_cr_otel_config.id
+        default_mode = 292 # 0444
+        items {
+          version = "latest"
+          path    = local.otel_config_name
         }
       }
+    }
 
+
+    containers {
+      image = "otel/opentelemetry-collector-contrib:0.111.0"
+
+      args = ["--config=${local.otel_config_path}/${local.otel_config_name}"]
+
+      volume_mounts {
+        name       = "otel-config"
+        mount_path = local.otel_config_path
+      }
 
       ports {
-        container_port = 8080
+        name           = "http1"
+        container_port = 4318
+      }
+
+      startup_probe {
+        initial_delay_seconds = 5
+        timeout_seconds       = 20
+        period_seconds        = 60
+        failure_threshold     = 1
+        tcp_socket {
+          port = 4318
+        }
       }
     }
+
 
     containers {
       name  = "wadm"
       image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wadm:v0.17.1"
+
       resources {
         limits = {
           cpu    = "2"
           memory = "2048Mi"
         }
+        cpu_idle = false
       }
 
       env {
@@ -351,7 +415,7 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
       }
       env {
         name  = "WADM_TRACING_ENABLED"
-        value = "false"
+        value = "true"
       }
 
       volume_mounts {
