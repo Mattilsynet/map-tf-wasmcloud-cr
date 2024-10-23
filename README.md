@@ -3,13 +3,35 @@
 [map-tf-wasmcloud-cr] terraform module provisions wasmcloud and wadm instances as
 Google Cloud Run services.
 
-## Research notes
+## Open questions and observations
 
-Think this is about wasmcloud binary and not wash up: 
-https://wasmcloud.com/docs/reference/host-config 
+- Should the wasmcloud ctl nats credentials be different than the wadm api credentials. I (LET) would think so.
+- What is the preferd client for deploying applications, is it wash app or wadm binary?
+- Separate NATS users for deploying wadm file? Since it requires access to the wadm api over nats.
+- Documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
+
+## Todo
+
+- Secrets for nats credentials should not be created by the module. The module should take them in as names, and use a data resource to accomplish the iam rules.
 
 
-That above seems severly outdated. Investiage the binary from https://github.com/wasmCloud/wasmCloud/releases/tag/v1.3.1 
+## NATS Users
+
+### wasmCloud RPC
+
+```terminal
+subjects:
+
+```
+
+### wasmCloud CTL
+
+```terminal
+
+```
+
+### wadm
+
 
 ## Usage
 
