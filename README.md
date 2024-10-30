@@ -15,22 +15,60 @@ Google Cloud Run services.
 - Secrets for nats credentials should not be created by the module. The module should take them in as names, and use a data resource to accomplish the iam rules.
 
 
+## Prerequisites 
+
+This module requires three named secrets that must exist as 'Secrets' with a valid 'Secret Version' in Secret Manager.
+
+```terraform
+var.wcrpc_secret_name
+var.wcctl_secret_name
+var.wadm_secret_name
+```
+
 ## NATS Users
 
 ### wasmCloud RPC
 
+#### publish.allow
 ```terminal
-subjects:
+wasmbus.rpc.>
 
+```
+
+#### subscribe.allow
+```terminal
+wasmbus.rpc.>
+INBOX.>
 ```
 
 ### wasmCloud CTL
 
+
+#### publish.allow
 ```terminal
+wasmbus.ctl.>
 
 ```
 
+#### subscribe.allow
+```terminal
+wasmbus.ctl.>
+INBOX.>
+```
+
 ### wadm
+
+#### publish.allow
+```terminal
+wadm.api.>
+
+```
+
+#### subscribe.allow
+```terminal
+INBOX.>
+```
+
 
 
 ## Usage

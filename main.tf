@@ -256,7 +256,7 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
 
     containers {
       name  = "wasmcloud"
-      image = "wasmcloud/wasmcloud:1.3.1"
+      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wasmcloud:1.4.0"
 
       resources {
         limits = {
@@ -391,7 +391,7 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
 
     containers {
       name  = "wadm"
-      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wadm:v0.17.1"
+      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wadm:v0.18.0"
 
       resources {
         limits = {
