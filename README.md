@@ -10,6 +10,9 @@ Google Cloud Run services.
 ## Todo
 
 - secrets-nats-kv server deployment and client usage.
+- improve otel configuration
+- better way to health check a deployment
+- lots more :)
 
 ## Prerequisites 
 
