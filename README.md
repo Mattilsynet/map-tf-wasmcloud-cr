@@ -77,9 +77,12 @@ subscribe.allow:
 
 ## Usage
 
-module usage here.
+Terraform is usage is pretty much business as usual, but how to use the wasmcloud deployment
+requires a bit of tinkering with client configuration.
 
-### Wash
+### terraform 
+
+### wash
 ```sh
 # Create a new context
 wash ctx new <gcpprojectid>
@@ -89,6 +92,18 @@ wash ctx edit <gcpprojectid>
 
 # Set active context
 wash ctx default <gcpprojectid>
+```
+
+### wash call
+
+> WARNING! wash subcommands are not completely aligned with environment variables and don't respect the wash ctx properly.
+
+```bash
+export RUST_LOG="info,hyper=info,async_nats=info,oci_distribution=info,cranelift_codegen=warn"
+export WASMCLOUD_RPC_HOST="your.nats.host"
+export WASMCLOUD_RPC_PORT="4222"
+export WASMCLOUD_RPC_TLS="true"
+export WASH_RPC_CREDS="/path/to/your/rpc/credentials"
 ```
 
 
