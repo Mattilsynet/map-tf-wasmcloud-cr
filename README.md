@@ -5,16 +5,11 @@ Google Cloud Run services.
 
 ## Open questions and observations
 
-- Should the wasmcloud ctl nats credentials be different than the wadm api credentials. I (LET) would think so.
-- What is the preferd client for deploying applications, is it wash app or wadm binary?
-- Separate NATS users for deploying wadm file? Since it requires access to the wadm api over nats.
 - Documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
 
 ## Todo
 
-- Secrets for nats credentials should not be created by the module. The module should take them in as names, and use a data resource to accomplish the iam rules.
 - secrets-nats-kv server deployment and client usage.
-- DOC: How to use wash as a client against this environment.
 
 ## Prerequisites 
 
@@ -32,12 +27,14 @@ This module requires three named secrets that must exist as 'Secrets' with a val
 
 ### wasmCloud RPC
 
+> Showing just default lattice. 
+
 ```plaintext
 publish.allow:
-  wasmbus.rpc.>
+  default.>
 
 subscribe.allow
-  wasmbus.rpc.>
+  default.>
   INBOX.>
 ```
 
