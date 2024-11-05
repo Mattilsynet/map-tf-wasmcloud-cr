@@ -1,15 +1,17 @@
 # map-tf-wasmcloud-cr
 
 [map-tf-wasmcloud-cr] terraform module provisions wasmcloud and wadm instances as
-Google Cloud Run services.
+Google Cloud Run services. 
+
+Both the wasmcloud and wadm service runs the otel collector as a sidecar and write to Google Cloud Platform backends (logging, metrics, traces).
 
 ## Open questions and observations
 
-- Documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
+- wasmCloud documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
 
 ## Todo
 
-- CLUSTER_SEED implications.
+- figure out CLUSTER_SEED implications.
 - secrets-nats-kv server deployment and client usage.
 - improve otel configuration
 - better way to health check a deployment of this module than to rely on otel endpoints :D
@@ -27,7 +29,7 @@ This module requires three named secrets that must exist as 'Secrets' with a val
 
 ## NATS Users
 
-> The permissions below are a bit naive and does not account for lattices.
+> WARNING: This documentation is just placeholder information. WIP ongoing for actual subject filters required. 
 
 ### wasmCloud RPC
 
