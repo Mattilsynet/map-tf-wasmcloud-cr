@@ -5,6 +5,31 @@ Google Cloud Run services.
 
 Both the wasmcloud and wadm service runs the otel collector as a sidecar and write to Google Cloud Platform backends (logging, metrics, traces).
 
+
+```mermaid
+graph LR
+
+subgraph HUB_Cluster
+    NATS
+end
+
+subgraph Your_GCP_Project
+    wadm[wadm]
+    wasmcloud[wasmcloud]
+    gcpapis[GCP API's]
+
+    wadm --> |ctl credentials| NATS
+    wasmcloud --> |ctl and rpc credentials| NATS
+    wadm --> |Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    wasmcloud -->|Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+end
+  
+subgraph User
+    washapp[wash app] --> |nats wadm client credentials| NATS
+    washcall[wash call] --> |wash rpc debug credentials| NATS
+end
+```
+
 ## Open questions and observations
 
 - wasmCloud documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
