@@ -9,9 +9,10 @@ Google Cloud Run services.
 
 ## Todo
 
+- CLUSTER_SEED implications.
 - secrets-nats-kv server deployment and client usage.
 - improve otel configuration
-- better way to health check a deployment
+- better way to health check a deployment of this module than to rely on otel endpoints :D
 - lots more :)
 
 ## Prerequisites 
@@ -81,6 +82,25 @@ Terraform is usage is pretty much business as usual, but how to use the wasmclou
 requires a bit of tinkering with client configuration.
 
 ### terraform 
+
+> Version in usage may not exist, inspect repo releases/tags.
+
+```terraform
+module "wasmcloud" {
+  source = "github.com/Mattilsynet/map-tf-wasmcloud-cr@v1.0.0"
+
+  project_id = "your-gcp-project-id"
+
+  wasmcloud_rpc_nats_host = "your.rpc.nats.infra"
+  wasmcloud_ctl_nats_host = "your.ctl.nats.infra"
+  wadm_nats_host          = "your.ctl.nats.infra" 
+
+  wadm_secret_name  = "your-wadm-creds"
+  wcctl_secret_name = "your-ctl-creds"
+  wcrpc_secret_name = "your-rpc-creds"
+}
+
+```
 
 ### wash
 ```sh
