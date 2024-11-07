@@ -66,7 +66,7 @@ publish.allow:
 
 subscribe.allow
   default.>
-  INBOX.>
+  _INBOX.>
 ```
 
 ### wasmCloud CTL
@@ -74,10 +74,12 @@ subscribe.allow
 ```plaintext
 publish.allow:
   wasmbus.ctl.v1.>
+  wasmbus.evt.*.>
 
 subscribe.allow
   wasmbus.ctl.v1.>
-  INBOX.>
+  wasmbus.evt.*.>
+  _INBOX.>
 ```
 
 ### wadm (server)
@@ -88,7 +90,8 @@ publish.allow
 
 subscribe.allow
   wadm.api.>
-  INBOX.>
+  wasmbus.evt.*.>
+  _INBOX.>
 ```
 
 ### wash app (wadm api access) 
@@ -98,7 +101,7 @@ publish.allow:
   wadm.api.>
 
 subscribe.allow:
-  INBOX.>
+  _INBOX.>
 ```
 
 ### secrets-nats-kv (server/client)
