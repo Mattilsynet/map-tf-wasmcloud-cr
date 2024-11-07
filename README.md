@@ -35,6 +35,10 @@ subgraph User
 end
 ```
 
+## Status
+
+The module is a work in progress and wholly unfinished. It may work for you, it may not. Here be dragons!
+
 ## Todo
 
 - figure out CLUSTER_SEED implications.
