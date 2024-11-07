@@ -1,9 +1,14 @@
 # map-tf-wasmcloud-cr
 
-[map-tf-wasmcloud-cr] terraform module provisions wasmcloud and wadm instances as
+This terraform module provisions wasmcloud, wadm and secrets-nats-kv instances as
 Google Cloud Run services. 
 
-Both the wasmcloud and wadm service runs the otel collector as a sidecar and write to Google Cloud Platform backends (logging, metrics, traces).
+Yes, we pack components and providers in serverless infrastructure! Fun!
+
+> The module requires you to bring your own NATS infrastructure.
+
+Both the wasmcloud and wadm service runs the otel collector as a sidecar and write 
+to Google Cloud Platform backends (logging, metrics, traces).
 
 
 ```mermaid
@@ -30,10 +35,6 @@ subgraph User
 end
 ```
 
-## Open questions and observations
-
-- wasmCloud documentation should be more clear on what is local development flow and how to work with a provided wasmcloud environment.
-
 ## Todo
 
 - figure out CLUSTER_SEED implications.
@@ -44,6 +45,12 @@ end
 
 ## Prerequisites 
 
+### NATS
+
+A working NATS infrastucture with Jetstream enabled, that is connectable from Google Cloud Run Services.
+
+### Predefined secrets
+
 This module requires three named secrets that must exist as 'Secrets' with a valid 'Secret Version' in Secret Manager.
 
 ```terraform
@@ -52,11 +59,15 @@ This module requires three named secrets that must exist as 'Secrets' with a val
   wadm_secret_name = "yet another thing"
 ```
 
-## NATS Users
+See the following section on `NATS Users` on how to configure the required permissions.
+
+> If you are just starting out, you may use the same secret with all permissions for all purposes. Not recomended in a production setting.
+
+### NATS Users
 
 > WARNING: This documentation is just placeholder information. WIP ongoing for actual subject filters required. 
 
-### wasmCloud RPC
+#### wasmCloud RPC
 
 > Showing just default lattice. 
 
@@ -69,7 +80,7 @@ subscribe.allow
   _INBOX.>
 ```
 
-### wasmCloud CTL
+#### wasmCloud CTL
 
 ```plaintext
 publish.allow:
@@ -82,7 +93,7 @@ subscribe.allow
   _INBOX.>
 ```
 
-### wadm (server)
+#### wadm (server)
 
 ```plaintext
 publish.allow
@@ -94,7 +105,7 @@ subscribe.allow
   _INBOX.>
 ```
 
-### wash app (wadm api access) 
+#### wash app (wadm api access) 
 
 ```plaintext
 publish.allow:
@@ -104,7 +115,7 @@ subscribe.allow:
   _INBOX.>
 ```
 
-### secrets-nats-kv (server/client)
+#### secrets-nats-kv (server/client)
 
 ## Usage
 
@@ -128,6 +139,9 @@ module "wasmcloud" {
   wadm_secret_name  = "your-wadm-creds"
   wcctl_secret_name = "your-ctl-creds"
   wcrpc_secret_name = "your-rpc-creds"
+ 
+  number_of_wadm_hosts = 1 
+  number_of_wasmcloud_hosts = 2
 }
 
 ```
