@@ -45,6 +45,7 @@ The module is a work in progress and wholly unfinished. It may work for you, it 
 - secrets-nats-kv server deployment and client usage.
 - improve otel configuration
 - better way to health check a deployment of this module than to rely on otel endpoints :D
+- decide on a meaningful labling of hosts
 - lots more :)
 
 ## Prerequisites 
@@ -77,10 +78,10 @@ See the following section on `NATS Users` on how to configure the required permi
 
 ```plaintext
 publish.allow:
-  default.>
+  default.*.wrpc.>
 
 subscribe.allow
-  default.>
+  default.*.wrpc.>
   _INBOX.>
 ```
 
