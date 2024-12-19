@@ -110,17 +110,29 @@ subscribe.allow
   _INBOX.>
 ```
 
-#### wash app (wadm api access) 
+#### wash app (wasmcloud users context) 
 
 ```plaintext
 publish.allow:
   wadm.api.>
+  wasmcloud.secrets.*.>
 
 subscribe.allow:
   _INBOX.>
 ```
 
-#### secrets-nats-kv (server/client)
+#### secrets-nats-kv (server)
+
+```plaintext
+publish.allow:
+  $KV.wasmcloud_secrets.> 
+
+subscribe.allow:
+  wasmcloud.secrets.nats-kv.>
+  $KV.wasmcloud_secrets.>
+  _INBOX.>
+```
+
 
 ## Usage
 
@@ -203,6 +215,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [google_artifact_registry_repository_iam_member.gar_repo_member](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/artifact_registry_repository_iam_member) | resource |
+| [google_cloud_run_v2_service.nats_secrets_kv_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service) | resource |
 | [google_cloud_run_v2_service.wadm_v2_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service) | resource |
 | [google_cloud_run_v2_service.wasmcloud_v2_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/cloud_run_v2_service) | resource |
 | [google_project_iam_member.wadm_iam_cloudtrace_agent](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
@@ -223,6 +236,9 @@ No modules.
 | [google_service_account.wasmcloud_service_sa](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_key.wasmcloud_service_sa_key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 | [google_artifact_registry_repository.gar_repo](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/artifact_registry_repository) | data source |
+| [google_secret_manager_secret.encryption_xkey_seed](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
+| [google_secret_manager_secret.secrets_nats_kv_secret_name](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
+| [google_secret_manager_secret.transit_xkey_seed](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
 | [google_secret_manager_secret.wadm_nats_creds](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
 | [google_secret_manager_secret.wasmcloud_ctl_nats_creds](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
 | [google_secret_manager_secret.wasmcloud_rpc_nats_creds](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret) | data source |
@@ -231,10 +247,14 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_encryption_xkey_seed_secret_name"></a> [encryption\_xkey\_seed\_secret\_name](#input\_encryption\_xkey\_seed\_secret\_name) | Name of secret containing the ENCRYPTION\_XKEY\_SEED value used by secrets-nats-kv. | `string` | n/a | yes |
+| <a name="input_number_of_secrets_nats_kv_hosts"></a> [number\_of\_secrets\_nats\_kv\_hosts](#input\_number\_of\_secrets\_nats\_kv\_hosts) | Number of secret-nats-kv(instances) hosts to run. | `number` | `1` | no |
 | <a name="input_number_of_wadm_hosts"></a> [number\_of\_wadm\_hosts](#input\_number\_of\_wadm\_hosts) | Number of wadm hosts to run. | `number` | `1` | no |
 | <a name="input_number_of_wasmcloud_hosts"></a> [number\_of\_wasmcloud\_hosts](#input\_number\_of\_wasmcloud\_hosts) | Number of wasmcloud hosts to run. | `number` | `1` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The project ID to deploy the resources. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which to create the resources. | `string` | `"europe-north1"` | no |
+| <a name="input_secrets_nats_kv_secret_name"></a> [secrets\_nats\_kv\_secret\_name](#input\_secrets\_nats\_kv\_secret\_name) | The name of the secret with NATS Credentials used by secrets-nats-kv to connect to NATS. | `string` | n/a | yes |
+| <a name="input_transit_xkey_seed_secret_name"></a> [transit\_xkey\_seed\_secret\_name](#input\_transit\_xkey\_seed\_secret\_name) | Name of secret containing the TRANSIT\_XKEY\_Seed value used by secrets-nats-kv. | `string` | n/a | yes |
 | <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.111.0"` | no |
 | <a name="input_version_wadm"></a> [version\_wadm](#input\_version\_wadm) | The version of wadm to deploy. | `string` | `"v0.18.0"` | no |
 | <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.4.0"` | no |

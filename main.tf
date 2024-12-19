@@ -294,8 +294,8 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
 
       resources {
         limits = {
-          cpu    = "2"
-          memory = "4096Mi"
+          cpu    = "2000m"
+          memory = "4Gi"
         }
         cpu_idle = false
       }
@@ -439,7 +439,7 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
 
       resources {
         limits = {
-          cpu    = "1"
+          cpu    = "1000m"
           memory = "512Mi"
         }
         cpu_idle = false
@@ -464,8 +464,8 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
 
       resources {
         limits = {
-          cpu    = "2"
-          memory = "2048Mi"
+          cpu    = "1000m"
+          memory = "2Gi"
         }
         cpu_idle = false
       }
