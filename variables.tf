@@ -77,7 +77,17 @@ variable "wadm_secret_name" {
 }
 
 variable "secrets_nats_kv_secret_name" {
-  description = "The name of the secret with NATS Credentials used by secrets-nats-kv to connect to NATS."
+  description = "The name of the secret to store the NATS key-value store credentials."
+  type        = string
+}
+
+variable "secrets_nats_kv_transit_secret_name" {
+  description = "The name of the secret that has the transit xkey seed."
+  type        = string
+}
+
+variable "secrets_nats_kv_encryption_secret_name" {
+  description = "The name of the secret that has the encryption xkey seed."
   type        = string
 }
 
@@ -93,19 +103,8 @@ variable "number_of_wadm_hosts" {
   default     = 1
 }
 
-variable "number_of_secrets_nats_kv_hosts" {
-  description = "Number of secret-nats-kv(instances) hosts to run."
+variable "number_of_secrets_nats_kv_instances" {
+  description = "Number of NATS key-value store instances to run."
   type        = number
   default     = 1
 }
-
-variable "transit_xkey_seed_secret_name" {
-  description = "Name of secret containing the TRANSIT_XKEY_Seed value used by secrets-nats-kv."
-  type        = string
-}
-
-variable "encryption_xkey_seed_secret_name" {
-  description = "Name of secret containing the ENCRYPTION_XKEY_SEED value used by secrets-nats-kv."
-  type        = string
-}
-

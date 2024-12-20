@@ -1,6 +1,13 @@
 locals {
-  wasmcloud_service_name = "wasmcloud"
-  wadm_service_name      = "wadm"
+  wasmcloud_service_name       = "wasmcloud"
+  wadm_service_name            = "wadm"
+  secrets_nats_kv_service_name = "secrets-nats-kv"
+
+  secrets_nats_kv_creds_name = "secrets.creds"
+  secrets_nats_kv_creds_path = "/etc/nats/secret-creds"
+
+  secrets_nats_kv_transit_secret_name    = "secrets-nats-kv-transit-seed"
+  secrets_nats_kv_encryption_secret_name = "secrets-nats-kv-encryption-seed"
 
   wasmcloud_rpc_nats_creds_name = "rpc-nats.creds"
   wasmcloud_rpc_nats_creds_path = "/etc/nats/rpc-creds"
@@ -43,6 +50,13 @@ resource "google_service_account" "wadm_service_sa" {
   account_id   = "wadm-service"
   display_name = "wadm-service"
   description  = "Service Account for cloud run service: ${local.wadm_service_name}"
+  project      = var.project_id
+}
+
+resource "google_service_account" "secrets_nats_kv" {
+  account_id   = "secrets-nats-kv"
+  display_name = "secrets-nats-kv"
+  description  = "Service Account for cloud run service ${local.secrets_nats_kv_service_name}"
   project      = var.project_id
 }
 
@@ -139,6 +153,22 @@ data "google_secret_manager_secret" "wadm_nats_creds" {
   project   = var.project_id
 }
 
+data "google_secret_manager_secret" "secrets_nats_kv_nats_creds" {
+  secret_id = var.secrets_nats_kv_secret_name
+  project   = var.project_id
+}
+
+### Secrets, secrets-nats-kv
+
+data "google_secret_manager_secret" "secrets_nats_kv_transit_secret" {
+  secret_id = var.secrets_nats_kv_transit_secret_name
+  project   = var.project_id
+}
+
+data "google_secret_manager_secret" "secrets_nats_kv_encryption_secret" {
+  secret_id = var.secrets_nats_kv_encryption_secret_name
+  project   = var.project_id
+}
 ### Secrets, Configs
 
 locals {
@@ -182,6 +212,12 @@ locals {
     "wadm_nats_creds"          = data.google_secret_manager_secret.wadm_nats_creds.secret_id,
     "wasmcloud_cr_otel_config" = google_secret_manager_secret.wasmcloud_cr_otel_config.id,
   }
+
+  secrets_nats_kv_secrets = {
+    "nats_creds"      = data.google_secret_manager_secret.secrets_nats_kv_nats_creds.id,
+    "transit_seed"    = data.google_secret_manager_secret.secrets_nats_kv_transit_secret.id,
+    "encryption_seed" = data.google_secret_manager_secret.secrets_nats_kv_encryption_secret.id,
+  }
 }
 
 resource "google_secret_manager_secret_iam_member" "wasmcloud_secret_access" {
@@ -200,6 +236,15 @@ resource "google_secret_manager_secret_iam_member" "wadm_secret_access" {
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.wadm_service_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "secrets_nats_kv_secret_access" {
+  for_each = local.secrets_nats_kv_secrets
+
+  project   = var.project_id
+  secret_id = each.value
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.secrets_nats_kv.email}"
 }
 
 ### Services
@@ -493,5 +538,96 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
       }
     }
 
+  }
+}
+resource "google_cloud_run_v2_service" "secrets_nats_kv_service" {
+  name                = "secrets-nats-kv"
+  location            = var.region
+  project             = var.project_id
+  deletion_protection = false
+
+  template {
+    service_account = google_service_account.secrets_nats_kv.email
+
+    volumes {
+      name = "nats-creds"
+      secret {
+        secret       = data.google_secret_manager_secret.secrets_nats_kv_nats_creds.id
+        default_mode = 292 # 0444
+        items {
+          version = "latest"
+          path    = local.secrets_nats_kv_creds_name
+        }
+      }
+    }
+
+    scaling {
+      min_instance_count = var.number_of_secrets_nats_kv_instances
+      max_instance_count = var.number_of_secrets_nats_kv_instances
+    }
+
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+      ports {
+        name           = "http1"
+        container_port = 8080
+      }
+
+      resources {
+        limits = {
+          "memory" = "512Mi",
+          "cpu"    = "1"
+        }
+      }
+    }
+    containers {
+      image = "europe-north1-docker.pkg.dev/artifacts-352708/map/secrets-nats-kv:latest"
+
+      args = ["run", "--nats-address", "tls://${var.wadm_nats_host}:${var.wadm_nats_port}"]
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+        cpu_idle = false
+      }
+
+      #      env {
+      #        name  = "NATS_ADDRESS"
+      #        value = "tls://${var.wadm_nats_host}:4222"
+      #      }
+
+      env {
+        name  = "NATS_CREDSFILE"
+        value = "${local.secrets_nats_kv_creds_path}/${local.secrets_nats_kv_creds_name}"
+      }
+
+      env {
+        name = "TRANSIT_XKEY_SEED"
+        value_source {
+          secret_key_ref {
+            secret  = data.google_secret_manager_secret.secrets_nats_kv_transit_secret.id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
+        name = "ENCRYPTION_XKEY_SEED"
+        value_source {
+          secret_key_ref {
+            secret  = data.google_secret_manager_secret.secrets_nats_kv_encryption_secret.id
+            version = "latest"
+          }
+        }
+      }
+
+      volume_mounts {
+        name       = "nats-creds"
+        mount_path = local.secrets_nats_kv_creds_path
+      }
+    }
   }
 }

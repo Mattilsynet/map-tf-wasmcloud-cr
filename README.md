@@ -50,6 +50,37 @@ The module is a work in progress and wholly unfinished. It may work for you, it 
 
 ## Prerequisites 
 
+### nk
+
+We need to use nk utility to create nkeys for transit and encryption operations.
+
+> go install github.com/nats-io/nkeys/nk@latest
+
+
+```
+# This is just an example, do not use theese values:
+
+#Transit:
+
+❯ wash keys gen curve
+
+Public Key: XBJZQSHGFBF3EEXE3CQT3J6Y2QCOMZN6JOG7RC7GTQI6YBPM44OOS4OV
+Seed: SXAEHGFHGEHFZSCI4ZMTKTER4BUMJEI7T76WWP6722POEI4MKBY7YPUFQA
+
+# Encryption:
+❯ wash keys gen curve
+
+Public Key: XBM5AGUJLZRDVWMDMEVPFF6ELWJZREWZYPWJCPWXAJLMNQYGCUVZIW6T
+Seed: SXAEQE3MB3VJWC3UAETAOXZIND4DZQ5FXXQF4XXEN7GZC7ABFMW3T4DHRI
+```
+
+Create Google Secret Manager secrets based on the secret names in the terraform module :
+
+```terraform
+  secrets_nats_kv_transit_secret_name = "yourtransitseed-secretname"
+  secrets_nats_kv_encryption_secret_name = "yourencryptionseed-secretname"
+```
+
 ### NATS
 
 A working NATS infrastucture with Jetstream enabled, that is connectable from Google Cloud Run Services.
