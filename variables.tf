@@ -45,7 +45,7 @@ variable "wadm_nats_port" {
 variable "version_wasmcloud" {
   description = "The version of wasmcloud to deploy."
   type        = string
-  default     = "1.4.0"
+  default     = "1.4.2"
 }
 
 variable "version_wadm" {
