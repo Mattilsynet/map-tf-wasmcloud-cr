@@ -21,12 +21,14 @@ end
 subgraph Your_GCP_Project
     wadm[wadm]
     wasmcloud[wasmcloud]
+    secrets[secrets-nats-kv]
     gcpapis[GCP API's]
 
     wadm --> |ctl credentials| NATS
     wasmcloud --> |ctl and rpc credentials| NATS
     wadm --> |Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
     wasmcloud -->|Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    secrets --> |secrets credentials| NATS
 end
   
 subgraph User
@@ -42,7 +44,7 @@ The module is a work in progress and wholly unfinished. It may work for you, it 
 ## Todo
 
 - figure out CLUSTER_SEED implications.
-- secrets-nats-kv server deployment and client usage.
+- secrets client usage.
 - improve otel configuration
 - better way to health check a deployment of this module than to rely on otel endpoints :D
 - decide on a meaningful labling of hosts
@@ -60,26 +62,19 @@ We need to use nk utility to create nkeys for transit and encryption operations.
 ```
 # This is just an example, do not use theese values:
 
-#Transit:
-
 ❯ wash keys gen curve
 
 Public Key: XBJZQSHGFBF3EEXE3CQT3J6Y2QCOMZN6JOG7RC7GTQI6YBPM44OOS4OV
 Seed: SXAEHGFHGEHFZSCI4ZMTKTER4BUMJEI7T76WWP6722POEI4MKBY7YPUFQA
-
-# Encryption:
-❯ wash keys gen curve
-
-Public Key: XBM5AGUJLZRDVWMDMEVPFF6ELWJZREWZYPWJCPWXAJLMNQYGCUVZIW6T
-Seed: SXAEQE3MB3VJWC3UAETAOXZIND4DZQ5FXXQF4XXEN7GZC7ABFMW3T4DHRI
 ```
 
-Create Google Secret Manager secrets based on the secret names in the terraform module :
+Use the provided shell script(`gcp-gen-key-secrets.sh`) to generate the key pairs:
 
-```terraform
-  secrets_nats_kv_transit_secret_name = "yourtransitseed-secretname"
-  secrets_nats_kv_encryption_secret_name = "yourencryptionseed-secretname"
+```bash
+./gcp-gen-key-secrets.sh <your_project_id>
 ```
+
+> The "seed-key" secrets created are used as input variables in the terraform module as illustrated below.
 
 ### NATS
 
@@ -93,7 +88,9 @@ This module requires three named secrets that must exist as 'Secrets' with a val
   wcrpc_secret_name = "something"
   wcctl_secret_name = "something else"
   wadm_secret_name = "yet another thing"
-```
+  secrets_nats_kv_transit_secret_name    = "nats-kv-secrets-transit-seed-key"
+  secrets_nats_kv_encryption_secret_name = "nats-kv-secrets-encryption-seed-key"
+ ```
 
 See the following section on `NATS Users` on how to configure the required permissions.
 
