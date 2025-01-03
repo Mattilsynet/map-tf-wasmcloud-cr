@@ -51,7 +51,7 @@ variable "version_wasmcloud" {
 variable "version_wadm" {
   description = "The version of wadm to deploy."
   type        = string
-  default     = "v0.18.0"
+  default     = "v0.19.0"
 }
 
 variable "version_otel_collector" {
