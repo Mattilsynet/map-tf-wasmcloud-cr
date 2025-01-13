@@ -300,27 +300,8 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
     }
 
     containers {
-      image = "otel/opentelemetry-collector-contrib:${var.version_otel_collector}"
-
-      args = ["--config=${local.otel_config_path}/${local.otel_config_name}"]
-
-      volume_mounts {
-        name       = "otel-config"
-        mount_path = local.otel_config_path
-      }
-
-      ports {
-        name           = "http1"
-        container_port = 4318
-      }
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
-        }
-        cpu_idle = false
-      }
+      name  = "wasmcloud"
+      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wasmcloud:${var.version_wasmcloud}"
 
       startup_probe {
         initial_delay_seconds = 5
@@ -328,14 +309,9 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
         period_seconds        = 60
         failure_threshold     = 1
         tcp_socket {
-          port = 4318
+          port = 8080
         }
       }
-    }
-
-    containers {
-      name  = "wasmcloud"
-      image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wasmcloud:${var.version_wasmcloud}"
 
       resources {
         limits = {
@@ -345,10 +321,21 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
         cpu_idle = false
       }
 
+      ports {
+        name           = "http1"
+        container_port = 8080
+      }
+
+
       env {
         name  = "RUST_LOG"
         value = "info,hyper=info,async_nats=info,oci_distribution=info,cranelift_codegen=warn"
       }
+      env {
+        name  = "WASMCLOUD_HTTP_ADMIN"
+        value = "0.0.0.0:8080"
+      }
+
       env {
         name  = "WASMCLOUD_RPC_HOST"
         value = var.wasmcloud_rpc_nats_host
@@ -422,6 +409,25 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       volume_mounts {
         name       = "wasmcloud-ctl-nats-credentials"
         mount_path = local.wasmcloud_ctl_nats_creds_path
+      }
+    }
+
+    containers {
+      image = "otel/opentelemetry-collector-contrib:${var.version_otel_collector}"
+
+      args = ["--config=${local.otel_config_path}/${local.otel_config_name}"]
+
+      volume_mounts {
+        name       = "otel-config"
+        mount_path = local.otel_config_path
+      }
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
+        cpu_idle = false
       }
     }
   }

@@ -52,12 +52,7 @@ The module is a work in progress and wholly unfinished. It may work for you, it 
 
 ## Prerequisites 
 
-### nk
-
-We need to use nk utility to create nkeys for transit and encryption operations.
-
-> go install github.com/nats-io/nkeys/nk@latest
-
+## Secret Keys
 
 ```
 # This is just an example, do not use theese values:
@@ -289,7 +284,7 @@ No modules.
 | <a name="input_secrets_nats_kv_transit_secret_name"></a> [secrets\_nats\_kv\_transit\_secret\_name](#input\_secrets\_nats\_kv\_transit\_secret\_name) | The name of the secret that has the transit xkey seed. | `string` | n/a | yes |
 | <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.111.0"` | no |
 | <a name="input_version_wadm"></a> [version\_wadm](#input\_version\_wadm) | The version of wadm to deploy. | `string` | `"v0.19.0"` | no |
-| <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.4.2"` | no |
+| <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.5.0"` | no |
 | <a name="input_wadm_nats_host"></a> [wadm\_nats\_host](#input\_wadm\_nats\_host) | The hostname of the NATS server. | `string` | n/a | yes |
 | <a name="input_wadm_nats_port"></a> [wadm\_nats\_port](#input\_wadm\_nats\_port) | The port of the NATS server. | `string` | `"4222"` | no |
 | <a name="input_wadm_secret_name"></a> [wadm\_secret\_name](#input\_wadm\_secret\_name) | The name of the secret to store the wadm credentials. | `string` | n/a | yes |
