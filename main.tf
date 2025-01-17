@@ -392,6 +392,11 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
 
       env {
+        name  = "WASMCLOUD_SECRETS_TOPIC"
+        value = "wasmcloud.secrets"
+      }
+
+      env {
         name = "WASMCLOUD_OCI_REGISTRY_PASSWORD"
         value_source {
           secret_key_ref {
