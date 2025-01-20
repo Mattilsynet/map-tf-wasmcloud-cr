@@ -382,6 +382,11 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
       }
 
       env {
+        name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
+        value = "http://localhost:4318"
+      }
+
+      env {
         name  = "WASMCLOUD_OCI_REGISTRY"
         value = "europe-north1-docker.pkg.dev"
       }

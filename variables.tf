@@ -57,7 +57,7 @@ variable "version_wadm" {
 variable "version_otel_collector" {
   description = "The version of OTEL collector to use."
   type        = string
-  default     = "0.111.0"
+  default     = "0.117.0"
 }
 
 variable "wcrpc_secret_name" {

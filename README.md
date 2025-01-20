@@ -282,7 +282,7 @@ No modules.
 | <a name="input_secrets_nats_kv_encryption_secret_name"></a> [secrets\_nats\_kv\_encryption\_secret\_name](#input\_secrets\_nats\_kv\_encryption\_secret\_name) | The name of the secret that has the encryption xkey seed. | `string` | n/a | yes |
 | <a name="input_secrets_nats_kv_secret_name"></a> [secrets\_nats\_kv\_secret\_name](#input\_secrets\_nats\_kv\_secret\_name) | The name of the secret to store the NATS key-value store credentials. | `string` | n/a | yes |
 | <a name="input_secrets_nats_kv_transit_secret_name"></a> [secrets\_nats\_kv\_transit\_secret\_name](#input\_secrets\_nats\_kv\_transit\_secret\_name) | The name of the secret that has the transit xkey seed. | `string` | n/a | yes |
-| <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.111.0"` | no |
+| <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.117.0"` | no |
 | <a name="input_version_wadm"></a> [version\_wadm](#input\_version\_wadm) | The version of wadm to deploy. | `string` | `"v0.19.0"` | no |
 | <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.5.0"` | no |
 | <a name="input_wadm_nats_host"></a> [wadm\_nats\_host](#input\_wadm\_nats\_host) | The hostname of the NATS server. | `string` | n/a | yes |
