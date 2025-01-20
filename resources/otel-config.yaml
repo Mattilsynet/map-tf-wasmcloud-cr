@@ -29,6 +29,8 @@ processors:
 exporters:
   googlemanagedprometheus:
   googlecloud:
+    log:
+      default_log_name: wasmcloud
 
 service:
   pipelines:
