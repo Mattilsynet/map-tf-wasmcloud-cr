@@ -30,7 +30,7 @@ exporters:
   googlemanagedprometheus:
   googlecloud:
     log:
-      default_log_name: wasmcloud
+      default_log_name: wasmcloud 
 
 service:
   pipelines:
@@ -50,5 +50,12 @@ service:
         - resourcedetection
         - resource
       exporters: [googlemanagedprometheus]
-
+    logs:
+      receivers: [otlp]
+      processors:
+        - batch
+        - memory_limiter
+        - resourcedetection
+        - resource
+      exporters: [googlecloud]
 

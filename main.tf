@@ -255,6 +255,8 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
   project             = var.project_id
   deletion_protection = false
 
+  depends_on = [google_secret_manager_secret_version.wasmcloud_otel_config_version]
+
   template {
     service_account = google_service_account.wasmcloud_service_sa.email
 
@@ -448,6 +450,8 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
   location            = var.region
   project             = var.project_id
   deletion_protection = false
+
+  depends_on = [google_secret_manager_secret_version.wasmcloud_otel_config_version]
 
   template {
     service_account = google_service_account.wadm_service_sa.email
