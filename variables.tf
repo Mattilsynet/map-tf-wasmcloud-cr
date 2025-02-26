@@ -45,19 +45,19 @@ variable "wadm_nats_port" {
 variable "version_wasmcloud" {
   description = "The version of wasmcloud to deploy."
   type        = string
-  default     = "1.5.0"
+  default     = "1.6.2"
 }
 
 variable "version_wadm" {
   description = "The version of wadm to deploy."
   type        = string
-  default     = "v0.19.0"
+  default     = "v0.20.2"
 }
 
 variable "version_otel_collector" {
   description = "The version of OTEL collector to use."
   type        = string
-  default     = "0.117.0"
+  default     = "0.120.0"
 }
 
 variable "wcrpc_secret_name" {
