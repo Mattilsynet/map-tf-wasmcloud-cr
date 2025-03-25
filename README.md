@@ -1,7 +1,9 @@
 # map-tf-wasmcloud-cr
 
 This terraform module provisions wasmcloud, wadm and secrets-nats-kv instances as
-Google Cloud Run services. 
+Google Cloud Run services.
+
+> It now supports running in multiple cloud regions!
 
 Yes, we pack components and providers in serverless infrastructure! Fun!
 
