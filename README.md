@@ -11,7 +11,7 @@ Both the wasmcloud and wadm service runs the otel collector as a sidecar and wri
 to Google Cloud Platform backends (logging, metrics, traces).
 
 
-```mermaid
+```mermaid +render
 graph LR
 
 subgraph HUB_Cluster
@@ -19,16 +19,31 @@ subgraph HUB_Cluster
 end
 
 subgraph Your_GCP_Project
-    wadm[wadm]
-    wasmcloud[wasmcloud]
-    secrets[secrets-nats-kv]
+
+    subgraph Region1
+      wadmr1[wadm R1]
+      wasmcloudr1[wasmcloud R1]
+      secretsr1[secrets-nats-kv R1]
+    end
+
+    subgraph Region2
+      wadmr2[wadm R2]
+      wasmcloudr2[wasmcloud R2]
+      secretsr2[secrets-nats-kv R2]
+    end
     gcpapis[GCP API's]
 
-    wadm --> |ctl credentials| NATS
-    wasmcloud --> |ctl and rpc credentials| NATS
-    wadm --> |Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
-    wasmcloud -->|Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
-    secrets --> |secrets credentials| NATS
+    wadmr1 --> |ctl credentials| NATS
+    wasmcloudr1 --> |ctl and rpc credentials| NATS
+    wadmr1 --> |Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    wasmcloudr1 -->|Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    secretsr1 --> |secrets credentials| NATS
+
+    wadmr2 --> |ctl credentials| NATS
+    wasmcloudr2 --> |ctl and rpc credentials| NATS
+    wadmr2 --> |Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    wasmcloudr2 -->|Logging, Metrics, Traces<br>Service Account Credentials| gcpapis
+    secretsr2 --> |secrets credentials| NATS
 end
   
 subgraph User
