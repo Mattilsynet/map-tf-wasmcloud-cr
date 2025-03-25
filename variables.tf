@@ -3,8 +3,14 @@ variable "project_id" {
   type        = string
 }
 
-variable "region" {
+variable "regions" {
   description = "The region in which to create the resources."
+  type        = list(string)
+  default     = ["europe-north1", "europe-north2"]
+}
+
+variable "gar_region" {
+  description = "The region in which to create the global address."
   type        = string
   default     = "europe-north1"
 }
@@ -45,7 +51,7 @@ variable "wadm_nats_port" {
 variable "version_wasmcloud" {
   description = "The version of wasmcloud to deploy."
   type        = string
-  default     = "1.7.0"
+  default     = "1.7.0-debian"
 }
 
 variable "version_wadm" {

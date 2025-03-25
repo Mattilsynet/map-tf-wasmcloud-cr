@@ -71,8 +71,11 @@ resource "google_secret_manager_secret" "wasmcloud_service_account_token" {
   project   = var.project_id
   replication {
     user_managed {
-      replicas {
-        location = var.region
+      dynamic "replicas" {
+        for_each = var.regions
+        content {
+          location = replicas.value
+        }
       }
     }
   }
@@ -85,9 +88,10 @@ resource "google_secret_manager_secret_version" "wasmcloud_service_account_key_s
 
 ### Artifact Registry IAM
 
+// TODO: the gar stuff should be taken out, to specific to our needs
 data "google_artifact_registry_repository" "gar_repo" {
   project       = "artifacts-352708"
-  location      = var.region
+  location      = var.gar_region
   repository_id = "map"
 }
 
@@ -185,8 +189,11 @@ resource "google_secret_manager_secret" "wasmcloud_cr_otel_config" {
   project   = var.project_id
   replication {
     user_managed {
-      replicas {
-        location = var.region
+      dynamic "replicas" {
+        for_each = var.regions
+        content {
+          location = replicas.value
+        }
       }
     }
   }
@@ -250,8 +257,10 @@ resource "google_secret_manager_secret_iam_member" "secrets_nats_kv_secret_acces
 ### Services
 
 resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
-  name                = "wasmcloud"
-  location            = var.region
+  for_each = toset(var.regions)
+
+  name                = "wasmcloud-${each.key}"
+  location            = each.key
   project             = var.project_id
   deletion_protection = false
 
@@ -304,6 +313,12 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
     containers {
       name  = "wasmcloud"
       image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wasmcloud:${var.version_wasmcloud}"
+      //image = "ghcr.io/wasmcloud/wasmcloud:${var.version_wasmcloud}"
+
+      #args = [
+      #  "--label", "region=${each.key}",
+      #  "--label", "cloud=gcp",
+      #]
 
       startup_probe {
         initial_delay_seconds = 5
@@ -446,8 +461,10 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
 }
 
 resource "google_cloud_run_v2_service" "wadm_v2_service" {
-  name                = "wadm"
-  location            = var.region
+  for_each = toset(var.regions)
+
+  name                = "wadm-${each.key}"
+  location            = each.key
   project             = var.project_id
   deletion_protection = false
 
@@ -526,6 +543,7 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
     containers {
       name  = "wadm"
       image = "europe-north1-docker.pkg.dev/artifacts-352708/ghcr-test/wasmcloud/wadm:${var.version_wadm}"
+      //image = "ghcr.io/wasmcloud/wadm:${var.version_wadm}"
 
       resources {
         limits = {
@@ -561,8 +579,10 @@ resource "google_cloud_run_v2_service" "wadm_v2_service" {
   }
 }
 resource "google_cloud_run_v2_service" "secrets_nats_kv_service" {
-  name                = "secrets-nats-kv"
-  location            = var.region
+  for_each = toset(var.regions)
+
+  name                = "secrets-nats-kv-${each.key}"
+  location            = each.key
   project             = var.project_id
   deletion_protection = false
 
