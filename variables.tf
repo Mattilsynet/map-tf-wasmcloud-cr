@@ -51,7 +51,7 @@ variable "wadm_nats_port" {
 variable "version_wasmcloud" {
   description = "The version of wasmcloud to deploy."
   type        = string
-  default     = "1.7.0-debian"
+  default     = "1.8.0"
 }
 
 variable "version_wadm" {
@@ -63,7 +63,7 @@ variable "version_wadm" {
 variable "version_otel_collector" {
   description = "The version of OTEL collector to use."
   type        = string
-  default     = "0.122.0"
+  default     = "0.127.0"
 }
 
 variable "wcrpc_secret_name" {
