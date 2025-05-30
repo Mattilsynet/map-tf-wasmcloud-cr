@@ -345,6 +345,16 @@ resource "google_cloud_run_v2_service" "wasmcloud_v2_service" {
 
 
       env {
+        name  = "WASMCLOUD_LABEL_cloud"
+        value = "gcp"
+      }
+
+      env {
+        name  = "WASMCLOUD_LABEL_region"
+        value = each.key
+      }
+
+      env {
         name  = "RUST_LOG"
         value = "info,hyper=info,async_nats=info,oci_distribution=info,cranelift_codegen=warn"
       }

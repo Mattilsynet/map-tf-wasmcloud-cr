@@ -296,19 +296,13 @@ No modules.
 | <a name="input_number_of_wadm_hosts"></a> [number\_of\_wadm\_hosts](#input\_number\_of\_wadm\_hosts) | Number of wadm hosts to run. | `number` | `1` | no |
 | <a name="input_number_of_wasmcloud_hosts"></a> [number\_of\_wasmcloud\_hosts](#input\_number\_of\_wasmcloud\_hosts) | Number of wasmcloud hosts to run. | `number` | `1` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The project ID to deploy the resources. | `string` | n/a | yes |
-| <a name="input_regions"></a> [regions](#input\_regions) | The region in which to create the resources. | `list(string)` | <pre>[<br/>  "europe-north1",<br/>  "europe-north2"<br/>]</pre> | no |
+| <a name="input_regions"></a> [regions](#input\_regions) | The region in which to create the resources. | `list(string)` | <pre>[<br>  "europe-north1",<br>  "europe-north2"<br>]</pre> | no |
 | <a name="input_secrets_nats_kv_encryption_secret_name"></a> [secrets\_nats\_kv\_encryption\_secret\_name](#input\_secrets\_nats\_kv\_encryption\_secret\_name) | The name of the secret that has the encryption xkey seed. | `string` | n/a | yes |
 | <a name="input_secrets_nats_kv_secret_name"></a> [secrets\_nats\_kv\_secret\_name](#input\_secrets\_nats\_kv\_secret\_name) | The name of the secret to store the NATS key-value store credentials. | `string` | n/a | yes |
 | <a name="input_secrets_nats_kv_transit_secret_name"></a> [secrets\_nats\_kv\_transit\_secret\_name](#input\_secrets\_nats\_kv\_transit\_secret\_name) | The name of the secret that has the transit xkey seed. | `string` | n/a | yes |
-<<<<<<< HEAD
-| <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.122.0"` | no |
-| <a name="input_version_wadm"></a> [version\_wadm](#input\_version\_wadm) | The version of wadm to deploy. | `string` | `"v0.21.0"` | no |
-| <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.7.0-debian"` | no |
-=======
 | <a name="input_version_otel_collector"></a> [version\_otel\_collector](#input\_version\_otel\_collector) | The version of OTEL collector to use. | `string` | `"0.127.0"` | no |
 | <a name="input_version_wadm"></a> [version\_wadm](#input\_version\_wadm) | The version of wadm to deploy. | `string` | `"v0.21.0"` | no |
 | <a name="input_version_wasmcloud"></a> [version\_wasmcloud](#input\_version\_wasmcloud) | The version of wasmcloud to deploy. | `string` | `"1.8.0"` | no |
->>>>>>> 00c9184 (chore(versions): updated default versions used in module)
 | <a name="input_wadm_nats_host"></a> [wadm\_nats\_host](#input\_wadm\_nats\_host) | The hostname of the NATS server. | `string` | n/a | yes |
 | <a name="input_wadm_nats_port"></a> [wadm\_nats\_port](#input\_wadm\_nats\_port) | The port of the NATS server. | `string` | `"4222"` | no |
 | <a name="input_wadm_secret_name"></a> [wadm\_secret\_name](#input\_wadm\_secret\_name) | The name of the secret to store the wadm credentials. | `string` | n/a | yes |
